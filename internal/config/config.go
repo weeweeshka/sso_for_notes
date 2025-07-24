@@ -3,16 +3,18 @@ package config
 import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"os"
+	"time"
 )
 
 type Config struct {
-	Env         string `yaml:"env" env-default:"local"`
-	StoragePath string `yaml:"storagePath" env-default:"postgres://postgres:12345@localhost:5433/notes?sslmode=disable"`
+	Env         string        `yaml:"env" env-default:"local"`
+	StoragePath string        `yaml:"storagePath" env-default:"postgres://postgres:12345@localhost:5433/notes?sslmode=disable"`
+	TokenTTL    time.Duration `yaml:"token_ttl" env-default:"1h"`
 	GRPCServer
 }
 
 type GRPCServer struct {
-	Port    string `yaml:"port" env-default:"5445"`
+	Port    int    `yaml:"port" env-default:"5445"`
 	Timeout string `yaml:"timeout" env-default:"5s"`
 }
 

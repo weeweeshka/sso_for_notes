@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/weeweeshka/sso_for_notes/internal/app/buildApp"
+	"github.com/weeweeshka/sso_for_notes/internal/config"
 	"log/slog"
 	"os"
-	"sso/internal/config"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -12,10 +15,16 @@ func main() {
 
 	slogger := SetupLogger()
 	slog.Info("Logger initialized")
-
-	//TODO init app
-
-	//TODO gracefull down
+	app, err := buildApp.NewApp(cfg.Port, cfg.StoragePath, slogger, cfg.TokenTTL)
+	if err != nil {
+		panic(err)
+	}
+	go app.GRPCServer.MustRun()
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	slog.Info("Gracefully shutting down...")
+	<-stop
+	slog.Info("App stopped")
 
 }
 
