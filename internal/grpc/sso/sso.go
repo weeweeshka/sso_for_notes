@@ -2,7 +2,7 @@ package sso
 
 import (
 	"context"
-	authGrpc "github.com/weeweeshka/notes_auth/gen/go/auth"
+	authGrpc "github.com/weeweeshka/notes_auth/auth/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
