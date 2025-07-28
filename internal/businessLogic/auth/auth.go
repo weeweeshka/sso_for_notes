@@ -19,7 +19,8 @@ type Auth struct {
 }
 
 type AppProvider interface {
-	App(ctx context.Context, appID int) (models.App, error)
+	App(ctx context.Context, appID int32) (models.App, error)
+	CreateApp(ctx context.Context, appName string, secret string) (int32, error)
 }
 
 type AuthRegistration interface {
@@ -67,7 +68,7 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email string, password strin
 	return userID, nil
 }
 
-func (a *Auth) Login(ctx context.Context, email string, password string, appID int) (string, error) {
+func (a *Auth) Login(ctx context.Context, email string, password string, appID int32) (string, error) {
 	const op = "businessLogic.auth.Login"
 
 	log := a.log.With(slog.String("op", op))
@@ -98,4 +99,19 @@ func (a *Auth) Login(ctx context.Context, email string, password string, appID i
 	}
 	return token, nil
 
+}
+
+func (a *Auth) RegisterApp(ctx context.Context, appName string, secret string) (int32, error) {
+	const op = "businessLogic.auth.RegisterApp"
+	log := a.log.With(slog.String("op", op))
+
+	app, err := a.appProvider.CreateApp(ctx, appName, secret)
+	if err != nil {
+		log.Error("failed to find app", err)
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("App registered successfully!")
+
+	return app, nil
 }

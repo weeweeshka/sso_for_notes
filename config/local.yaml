@@ -1,5 +1,6 @@
 env: "local"
-storagePath: "postgres://postgres:12345@localhost:5433/notes?sslmode=disable"
+StoragePath: postgres://postgres:12345@localhost:5430/sso?sslmode=disabled
+token_ttl: 1h
 grpc:
   port: 5445
   timeout: 5s

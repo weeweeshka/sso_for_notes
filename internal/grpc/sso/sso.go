@@ -10,7 +10,8 @@ import (
 
 type Auth interface {
 	RegisterNewUser(ctx context.Context, email string, password string) (int64, error)
-	Login(ctx context.Context, email string, password string, appID int) (string, error)
+	Login(ctx context.Context, email string, password string, appID int32) (string, error)
+	RegisterApp(ctx context.Context, appName string, secret string) (int32, error)
 }
 
 type serverApi struct {
@@ -53,10 +54,27 @@ func (s *serverApi) Login(ctx context.Context, req *authGrpc.LoginRequest) (*aut
 		return nil, status.Error(codes.InvalidArgument, "App ID is required")
 	}
 
-	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.GetAppId()))
+	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetAppId())
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	return &authGrpc.LoginResponse{Token: token}, nil
+}
+
+func (s *serverApi) RegisterApp(ctx context.Context, req *authGrpc.AppRequest) (*authGrpc.AppResponse, error) {
+
+	if req.GetName() == "" {
+		return nil, status.Error(codes.InvalidArgument, "App name is required")
+	}
+	if req.GetSecret() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Secret is required")
+	}
+
+	appID, err := s.auth.RegisterApp(ctx, req.GetName(), req.GetSecret())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &authGrpc.AppResponse{AppId: appID}, nil
 }

@@ -52,7 +52,7 @@ func NewStorage(connString string, log *slog.Logger) (*Storage, error) {
 	_, err = dbPool.Exec(ctx, `CREATE TABLE IF NOT EXISTS users(
     	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     	email TEXT NOT NULL UNIQUE,
-    	pass_hash  pass_hash BLOB NOT NULL) VALUES ($1, $2)`)
+    	pass_hash BYTEA NOT NULL)`)
 	if err != nil {
 		log.Error("failed to create table", err)
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -114,10 +114,10 @@ func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
 
 }
 
-func (s *Storage) App(ctx context.Context, id int) (models.App, error) {
+func (s *Storage) App(ctx context.Context, appID int32) (models.App, error) {
 	const op = "storage.sqlite.App"
 
-	row := s.db.QueryRow(ctx, `SELECT name, secret FROM apps WHERE id = $1`, id)
+	row := s.db.QueryRow(ctx, `SELECT id, name, secret FROM apps WHERE id = $1`, appID)
 
 	var app models.App
 	err := row.Scan(&app.ID, &app.Name, &app.Secret)
@@ -130,4 +130,24 @@ func (s *Storage) App(ctx context.Context, id int) (models.App, error) {
 	}
 
 	return app, nil
+}
+
+func (s *Storage) CreateApp(ctx context.Context, appName string, secret string) (int32, error) {
+	const op = "postgres.CreateApp"
+	log := slog.With(slog.String("op", op))
+
+	var appID int32
+	err := s.db.QueryRow(
+		ctx,
+		`INSERT INTO apps(name, secret) VALUES ($1, $2) RETURNING id`,
+		appName, secret,
+	).Scan(&appID)
+
+	if err != nil {
+		log.Error("failed to create app", err)
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("created app")
+	return appID, nil
 }
