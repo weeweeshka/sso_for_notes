@@ -7,7 +7,6 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	golang.org/x/crypto v0.40.0
 	google.golang.org/grpc v1.74.2
-	github.com/weeweeshka/notes_auth v2.0.0+incompatible
 )
 
 require (
