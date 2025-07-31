@@ -1,16 +1,29 @@
 FROM golang:1.24.4-alpine AS builder
 
+WORKDIR /app
 
-WORKDIR /build
+
+RUN apk add --no-cache git make gcc musl-dev
+
+
+COPY go.mod go.sum ./
+RUN go mod download
+
 
 COPY . .
-RUN go mod download
-RUN go build -o ./sso
 
-FROM gcr.io/distroless/base-debian12
+RUN go build -o sso ./cmd/main.go
+
+
+FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /build/sso ./sso
 
-CMD ["/app/sso"]
+COPY --from=builder /app/sso .
+COPY --from=builder /app/config ./config
+
+
+RUN ls -la /app/config
+
+CMD ["./sso"]

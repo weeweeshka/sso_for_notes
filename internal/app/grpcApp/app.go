@@ -28,7 +28,7 @@ func (a *GrpcApp) Run() error {
 	const op = "app.grpcApp.Run"
 	log := a.slog.With(slog.String("op", op), slog.Int("port", a.port))
 
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
+	l, err := net.Listen("tcp", "0.0.0.0:8080")
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}

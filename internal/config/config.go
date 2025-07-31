@@ -7,8 +7,7 @@ import (
 )
 
 type Config struct {
-	Env         string        `yaml:"env" env-default:"local"`
-	StoragePath string        `yaml:"storagePath" env-default:"postgres://postgres:12345@localhost:5430/sso?sslmode=disable"`
+	StoragePath string        `yaml:"storagePath" env-default:"postgres://postgres:12345@db:5432/sso?sslmode=disable"`
 	TokenTTL    time.Duration `yaml:"token_ttl" env-default:"1h"`
 	GRPCServer
 }
@@ -19,7 +18,7 @@ type GRPCServer struct {
 }
 
 func MustLoad() *Config {
-	return MustLoadPath("D:/go Projects/notes_auth/sso_for_notes/config/local.yaml")
+	return MustLoadPath("./config/local.yaml")
 }
 
 func MustLoadPath(configPath string) *Config {
